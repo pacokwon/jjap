@@ -3,6 +3,7 @@
 import argparse
 import bs4
 import json
+from pprint import pprint
 import re
 import requests
 from selenium import webdriver
@@ -19,7 +20,15 @@ def pages_to_words(soup, driver, page_template):
 
     words_per_page = 38
     pages = words // words_per_page + (0 if words % words_per_page == 0 else 1)
-    print(pages)
+
+    all_words = []
+    for page in range(pages):
+        print(f"Page: {page + 1}")
+        req = requests.get(page_template.format(page + 1))
+        page_soup = bs4.BeautifulSoup(req.text, "lxml")
+        all_words += single_page_to_words(page_soup, driver)
+
+    return all_words
 
 
 def single_page_to_words(soup, driver):
@@ -27,12 +36,28 @@ def single_page_to_words(soup, driver):
     children = lst.find_all(recursive=False)
 
     p = re.compile("(JK\\d+)(?!.*\\1)")
+    words_list = []
     for child in children:
-        print(
-            "Word:", list(map(lambda c: c.text, child.select("span:first-child > *")))
-        )
+        word_dict = {}
+
+        word = list(map(lambda c: c.text, child.select("span:first-child > *")))
+
+        if not word:
+            print("Does not have word")
+            continue
+
+        word_dict["furigana"] = word[0]
+        if len(word) > 1:
+            word_dict["kanji"] = word[1]
+
+        # print("Word:", word)
         result = p.search(child.find_all("a")[0]["href"])
-        print("Meaning:", meaning(result.group(1), driver))
+
+        word_dict["meaning"] = meaning(result.group(1), driver)
+        # print("Meaning:", word_dict["meaning"])
+
+        words_list.append(word_dict)
+    return words_list
 
 
 def meaning(code, driver):
@@ -104,9 +129,20 @@ def get_parsed_arguments():
     return args.level, parts.index(args.part)
 
 
+def applied_options(path):
+    chrome_options = Options()
+    with open(path) as json_file:
+        pref_json = json.load(json_file)
+    chrome_options.add_experimental_option("prefs", pref_json)
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_experimental_option("detach", True)
+    return chrome_options
+
+
 def main():
-    # level, part = get_parsed_arguments()
-    level, part = 4, 1
+    level, part = get_parsed_arguments()
+    # level, part = 5, 1
     page = 1
 
     base_url = "https://ja.dict.naver.com"
@@ -115,18 +151,15 @@ def main():
 
     sauce = requests.get(destination_template.format(level, part, page)).text
     soup = bs4.BeautifulSoup(sauce, "lxml")
-
-    chrome_options = Options()
-    with open("preferences.json") as json_file:
-        pref_json = json.load(json_file)
-    chrome_options.add_experimental_option("prefs", pref_json)
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--headless")
-    chrome_options.add_experimental_option("detach", True)
+    chrome_options = applied_options("preferences.json")
 
     driver = webdriver.Chrome("./chromedriver", options=chrome_options)
-    # single_page_to_words(soup, driver, base_url)
-    pages_to_words(soup, driver, destination_template.format(level, part, "{}"))
+    words_list = pages_to_words(
+        soup, driver, destination_template.format(level, part, "{}")
+    )
+
+    with open(f"level{level}part{part}.json", "w", encoding="utf-8") as f:
+        json.dump(words_list, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
