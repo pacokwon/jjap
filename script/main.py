@@ -17,19 +17,17 @@ def pages_to_words(soup, url):
     pass
 
 
-def wordcode_from_url(url):
-    pass
-
-
 def single_page_to_words(soup, driver, base_url):
     lst = soup.find_all(class_="lst")[0]
     children = lst.find_all(recursive=False)
 
     p = re.compile("(JK\\d+)(?!.*\\1)")
     for child in children:
-        print(child)
+        print(
+            "Word:", list(map(lambda c: c.text, child.select("span:first-child > *")))
+        )
         result = p.search(child.find_all("a")[0]["href"])
-        print(meaning(result.group(1), driver))
+        print("Meaning:", meaning(result.group(1), driver))
 
 
 def meaning(code, driver):
@@ -42,17 +40,18 @@ def meaning(code, driver):
     retrieved_code = requests.get(id_template.format(code)).json()
 
     word_template = "https://ja.dict.naver.com/#/entry/jako/{}"
-    # print(word_template.format(retrieved_code))
 
     driver.get(word_template.format(retrieved_code))
-    exists = wait(driver, "/html/body/div[2]/div[2]/div[1]/div[2]/div/p")
-    return (
-        driver.find_element_by_xpath(
-            "/html/body/div[2]/div[2]/div[1]/div[2]/div/p"
-        ).text
-        if exists
-        else ""
-    )
+
+    meaning_path = "/html/body/div[2]/div[2]/div[1]/div[2]/div/p"
+    exists = wait(driver, meaning_path)
+
+    if exists:
+        return driver.find_element_by_xpath(meaning_path).text
+
+    span_mean_tags = driver.find_elements_by_css_selector(".article span.mean")
+
+    return "\n".join([tag.get_attribute("innerText") for tag in span_mean_tags])
 
 
 def wait(driver, xpath):
@@ -101,7 +100,8 @@ def get_parsed_arguments():
 
 
 def main():
-    level, part = get_parsed_arguments()
+    # level, part = get_parsed_arguments()
+    level, part = 5, 1
 
     base_url = "https://ja.dict.naver.com"
     path = "/jlpt/level-{}/parts-{}/p1.nhn"
