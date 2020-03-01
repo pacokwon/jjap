@@ -177,3 +177,5 @@ tags
 .vim
 
 # End of https://www.gitignore.io/api/vim,react,macos,python
+
+/script/level[1-5]part[0-9]*.json
