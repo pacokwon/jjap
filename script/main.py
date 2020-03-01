@@ -13,11 +13,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 
-def pages_to_words(soup, url):
-    pass
+def pages_to_words(soup, driver, page_template):
+    p = re.compile("단어 (\\d+)건")
+    words = int(p.search(soup.find_all(class_="jlpt_rgt")[0].text).group(1))
+
+    words_per_page = 38
+    pages = words // words_per_page + (0 if words % words_per_page == 0 else 1)
+    print(pages)
 
 
-def single_page_to_words(soup, driver, base_url):
+def single_page_to_words(soup, driver):
     lst = soup.find_all(class_="lst")[0]
     children = lst.find_all(recursive=False)
 
@@ -71,7 +76,7 @@ def get_parsed_arguments():
         "-l",
         "--level",
         required=True,
-        help="JLPT Level. As of Feb. 2020, JLPT has levels 1 ~ 5",
+        help="JLPT Level. As of March. 2020, JLPT has levels 1 ~ 5",
     )
 
     parts = [
@@ -101,24 +106,27 @@ def get_parsed_arguments():
 
 def main():
     # level, part = get_parsed_arguments()
-    level, part = 5, 1
+    level, part = 4, 1
+    page = 1
 
     base_url = "https://ja.dict.naver.com"
-    path = "/jlpt/level-{}/parts-{}/p1.nhn"
+    path = "/jlpt/level-{}/parts-{}/p{}.nhn"
+    destination_template = base_url + path
 
-    sauce = requests.get(f"{base_url}{path}".format(level, part)).text
+    sauce = requests.get(destination_template.format(level, part, page)).text
     soup = bs4.BeautifulSoup(sauce, "lxml")
 
     chrome_options = Options()
     with open("preferences.json") as json_file:
         pref_json = json.load(json_file)
     chrome_options.add_experimental_option("prefs", pref_json)
-    chrome_options.add_experimental_option("detach", True)
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--headless")
+    chrome_options.add_experimental_option("detach", True)
 
     driver = webdriver.Chrome("./chromedriver", options=chrome_options)
-    single_page_to_words(soup, driver, base_url)
+    # single_page_to_words(soup, driver, base_url)
+    pages_to_words(soup, driver, destination_template.format(level, part, "{}"))
 
 
 if __name__ == "__main__":
