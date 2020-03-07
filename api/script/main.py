@@ -4,6 +4,7 @@ import argparse
 import bs4
 import json
 from pprint import pprint
+from pymongo import MongoClient
 import re
 import requests
 from selenium import webdriver
@@ -125,8 +126,16 @@ def get_parsed_arguments():
         choices=parts,
     )
 
+    parser.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        help="Output Method. Either json or db",
+        choices=["json", "db"],
+    )
+
     args = parser.parse_args()
-    return args.level, parts.index(args.part)
+    return args.level, parts.index(args.part), args.output
 
 
 def applied_options(path):
@@ -141,7 +150,7 @@ def applied_options(path):
 
 
 def main():
-    level, part = get_parsed_arguments()
+    level, part, output = get_parsed_arguments()
     # level, part = 5, 1
     page = 1
 
@@ -158,8 +167,16 @@ def main():
         soup, driver, destination_template.format(level, part, "{}")
     )
 
-    with open(f"level{level}part{part}.json", "w", encoding="utf-8") as f:
-        json.dump(words_list, f, ensure_ascii=False, indent=4)
+    if output == "db":
+        client = MongoClient(
+            "localhost", 27017, username="root", password="keyboardcat"
+        )
+        db = client["JLPT"]
+        collection = db[f"level{level}part{part}"]
+        collection.insert_many(words_list)
+    else:
+        with open(f"level{level}part{part}.json", "w", encoding="utf-8") as f:
+            json.dump(words_list, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
