@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-export default new mongoose.Schema({
+const Schema = new mongoose.Schema({
     furigana: {
         type: String,
         required: true
@@ -11,3 +11,5 @@ export default new mongoose.Schema({
         required: true
     }
 })
+
+export default Schema

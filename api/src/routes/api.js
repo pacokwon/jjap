@@ -1,6 +1,6 @@
 import express from 'express'
 import mongoose from 'mongoose'
-import jlptSchema from '../schema/jlptSchema'
+import jlptSchema from '../schema/jlptSchema.js'
 
 const router = express.Router()
 
