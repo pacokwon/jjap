@@ -7,9 +7,16 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=keyboardcat
     ports:
-      - 27017:27017
+      - "27017:27017"
     volumes:
-      - mongodb_data_container:/data/db
+      - mongodb_data_container: /data/db
+  jjb-node:
+    build: ./api
+    image: pacokwon/jjb-node
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
 
 volumes:
   mongodb_data_container:
