@@ -13,6 +13,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api', api)
 
-app.listen(5000, () => {
+app.listen(8080, () => {
     console.log('Listening on localhost:5000')
 })
