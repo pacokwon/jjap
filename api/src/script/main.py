@@ -3,8 +3,9 @@
 import argparse
 import bs4
 import json
+import os.path
 from pprint import pprint
-from pymongo import MongoClient
+import psycopg2
 import re
 import requests
 from selenium import webdriver
@@ -16,6 +17,11 @@ from selenium.webdriver.common.by import By
 
 
 def pages_to_words(soup, driver, page_template):
+    """
+    Once a vocablist's part and level are decided, words must be collected
+    from multiple pages. Retrieve the number of pages and visit each page
+    to collect words
+    """
     p = re.compile("단어 (\\d+)건")
     words = int(p.search(soup.find_all(class_="jlpt_rgt")[0].text).group(1))
 
@@ -33,6 +39,9 @@ def pages_to_words(soup, driver, page_template):
 
 
 def single_page_to_words(soup, driver):
+    """
+    Collect words from a single page
+    """
     lst = soup.find_all(class_="lst")[0]
     children = lst.find_all(recursive=False)
 
@@ -51,11 +60,13 @@ def single_page_to_words(soup, driver):
         if len(word) > 1:
             word_dict["kanji"] = word[1]
 
-        # print("Word:", word)
         result = p.search(child.find_all("a")[0]["href"])
 
         word_dict["meaning"] = meaning(result.group(1), driver)
-        # print("Meaning:", word_dict["meaning"])
+
+        if not word_dict["meaning"]:
+            print("Does not have meaning")
+            continue
 
         words_list.append(word_dict)
     return words_list
@@ -97,6 +108,9 @@ def wait(driver, xpath):
 
 
 def get_parsed_arguments():
+    """
+    Retrun parsed command line arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-l",
@@ -135,10 +149,18 @@ def get_parsed_arguments():
     )
 
     args = parser.parse_args()
-    return args.level, parts.index(args.part), args.output
+    return {
+        "level": args.level,
+        "part": args.part,
+        "output": args.output,
+        "part_index": parts.index(args.part),
+    }
 
 
 def applied_options(path):
+    """
+    Selenium browser options for optimization
+    """
     chrome_options = Options()
     with open(path) as json_file:
         pref_json = json.load(json_file)
@@ -149,33 +171,85 @@ def applied_options(path):
     return chrome_options
 
 
+def init_db(conn, level, part, words_list):
+    """
+    Create table if necessary and insert words
+    """
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            f"""CREATE TABLE IF NOT EXISTS level{level} (
+                            id SERIAL PRIMARY KEY,
+                            furigana text NOT NULL,
+                            kanji text,
+                            meaning text NOT NULL CHECK (meaning <> ''),
+                            part VARCHAR(20) NOT NULL CHECK (part <> '')
+                            ) """
+        )
+    except:
+        print("error occurred during table initialization")
+
+    for word in words_list:
+        cur.execute(
+            f"""INSERT INTO level{level}
+            (furigana, kanji, meaning, part)
+            VALUES (%s, %s, %s, %s);
+            """,
+            (
+                word["furigana"],
+                "" if "kanji" not in word else word["kanji"],
+                word["meaning"],
+                part,
+            ),
+        )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 def main():
-    level, part, output = get_parsed_arguments()
-    # level, part = 5, 1
-    page = 1
+    parsed_arguments = get_parsed_arguments()
 
-    base_url = "https://ja.dict.naver.com"
-    path = "/jlpt/level-{}/parts-{}/p{}.nhn"
-    destination_template = base_url + path
+    level = parsed_arguments["level"]
+    part_index = parsed_arguments["part_index"]
+    output = parsed_arguments["output"]
 
-    sauce = requests.get(destination_template.format(level, part, page)).text
-    soup = bs4.BeautifulSoup(sauce, "lxml")
-    chrome_options = applied_options("preferences.json")
+    file_exists = os.path.isfile(f"./vocablist/level{level}part{part_index}.json")
+    if file_exists:
+        with open(
+            f"./vocablist/level{level}part{part_index}.json", "r", encoding="utf-8"
+        ) as f:
+            words_list = json.load(f)
+    else:
+        base_url = "https://ja.dict.naver.com"
+        path = "/jlpt/level-{}/parts-{}/p{}.nhn"
+        destination_template = base_url + path
 
-    driver = webdriver.Chrome("./chromedriver", options=chrome_options)
-    words_list = pages_to_words(
-        soup, driver, destination_template.format(level, part, "{}")
-    )
+        sauce = requests.get(destination_template.format(level, part_index, page)).text
+        soup = bs4.BeautifulSoup(sauce, "lxml")
+        chrome_options = applied_options("preferences.json")
+
+        driver = webdriver.Chrome("./chromedriver", options=chrome_options)
+        words_list = pages_to_words(
+            soup, driver, destination_template.format(level, part_index, "{}")
+        )
 
     if output == "db":
-        client = MongoClient(
-            "localhost", 27017, username="root", password="keyboardcat"
-        )
-        db = client["JLPT"]
-        collection = db[f"level{level}part{part}"]
-        collection.insert_many(words_list)
-    else:
-        with open(f"level{level}part{part}.json", "w", encoding="utf-8") as f:
+        try:
+            conn = psycopg2.connect(
+                database="vocab_list",
+                user="root",
+                password="keyboardcat",
+                host="localhost",
+                port=5432,
+            )
+        except:
+            print("Connection attempt to database failed")
+        init_db(conn, level, parsed_arguments["part"], words_list)
+    elif not file_exists:
+        with open(
+            f"./vocablist/level{level}part{part}.json", "w", encoding="utf-8"
+        ) as f:
             json.dump(words_list, f, ensure_ascii=False, indent=4)
 
 
