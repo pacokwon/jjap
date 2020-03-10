@@ -1,22 +1,24 @@
 version: '3'
 
 services:
-  mongodb:
-    image: mongo:latest
+  database:
+    image: "postgres"
+    container_name: "postgres"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=keyboardcat
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=keyboardcat
+      - POSTGRES_DB=vocab_list
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongodb_data_container: /data/db
+      - database-data:/var/lib/postgresql/data
   jjb-node:
     build: ./api
     image: pacokwon/jjb-node
     ports:
       - "8080:8080"
     depends_on:
-      - mongodb
+      - database
 
 volumes:
-  mongodb_data_container:
+  database-data:
