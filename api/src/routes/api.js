@@ -1,14 +1,16 @@
 import express from 'express'
-import mongoose from 'mongoose'
-import jlptSchema from '../schema/jlptSchema.js'
+import pool from '../db/pool.js'
 
 const router = express.Router()
 
 router.get('/vocablist', (req, res) => {
     const { level, part } = req.query
-    const VocabList = mongoose.model(`level${level}part${part}`, jlptSchema)
-    VocabList.find({}, (err, data) => {
-        console.log(data)
+
+    pool.query(`SELECT * FROM level${level} WHERE part='${part}'`, (error, results) => {
+        if (error)
+            throw error
+
+        res.status(200).json(results.rows)
     })
 })
 
