@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
-import bs4
 import json
 import os.path
-from pprint import pprint
 import psycopg2
-import re
 import requests
 import urllib.parse
 
