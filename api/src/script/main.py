@@ -10,7 +10,7 @@ import urllib.parse
 
 def get_parsed_arguments():
     """
-    Retrun parsed command line arguments
+    Return parsed command line arguments
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -19,20 +19,6 @@ def get_parsed_arguments():
         required=True,
         help="JLPT Level. As of March. 2020, JLPT has levels 1 ~ 5",
     )
-
-    parts = [
-        "all",
-        "noun",
-        "pronoun",
-        "verb",
-        "postposition",
-        "adjective",
-        "adverb",
-        "affix",
-        "exclamation",
-        "adjective-verb",
-        "etc",
-    ]
 
     part_dict = {
         "all": "전체",
