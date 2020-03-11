@@ -6,6 +6,7 @@ import os.path
 import psycopg2
 import requests
 import urllib.parse
+from pprint import pprint
 
 
 def get_parsed_arguments():
@@ -39,7 +40,7 @@ def get_parsed_arguments():
         "--part",
         required=True,
         help="Part of Speech. Word Class.",
-        choices=parts,
+        choices=part_dict,
     )
 
     parser.add_argument(
@@ -107,7 +108,7 @@ def retrieve_word_list(level, part):
     for page in range(pages):
         print(f"Page {page + 1}")
         encoded_params = urllib.parse.urlencode(
-            {**params, page: page + 1}, quote_via=urllib.parse.quote
+            {**params, "page": page + 1}, quote_via=urllib.parse.quote
         )
         items = requests.get(f"{base_path}?{encoded_params}").json()["m_items"]
 
