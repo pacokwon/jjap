@@ -14,11 +14,20 @@ services:
       - database-data:/var/lib/postgresql/data
   jjb-node:
     build: ./api
+    container_name: "node"
     image: pacokwon/jjb-node
     ports:
       - "8000:8000"
     depends_on:
       - database
+  jjb-react-nginx:
+    build: ./client
+    container_name: "react"
+    image: pacokwon/jjb-react-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - jjb-node
 
 volumes:
   database-data:
