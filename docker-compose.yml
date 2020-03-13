@@ -12,22 +12,28 @@ services:
       - "5432:5432"
     volumes:
       - database-data:/var/lib/postgresql/data
-  jjb-node:
+  server:
+    image: pacokwon/jjb-node
     build: ./api
     container_name: "node"
-    image: pacokwon/jjb-node
+    environment:
+      - POSTGRES_HOST=postgres
+    volumes:
+      - ./api:/app
     ports:
       - "8000:8000"
     depends_on:
       - database
-  jjb-react-nginx:
+  client:
+    image: pacokwon/jjb-react
     build: ./client
     container_name: "react"
-    image: pacokwon/jjb-react-nginx
+    volumes:
+      - ./client:/app
     ports:
-      - "80:80"
+      - "8081:8081"
     depends_on:
-      - jjb-node
+      - server
 
 volumes:
   database-data:
