@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel --presets es2015 -d lib/ src"
+    "dev": "nodemon index.js"
   },
   "author": "Paco Kwon",
   "license": "ISC",

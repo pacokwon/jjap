@@ -1,12 +1,15 @@
-FROM node:13
+FROM node:13-alpine
+
+RUN npm install -g nodemon
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package*.json /app/
 
-RUN npm install
+RUN npm install && mv /app/node_modules /node_modules
 
-COPY . .
+COPY . /app/
 
 EXPOSE 8000
-CMD [ "node", "index.js" ]
+
+CMD [ "nodemon", "index.js" ]
