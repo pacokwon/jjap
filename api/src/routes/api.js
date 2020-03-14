@@ -6,7 +6,9 @@ const router = express.Router()
 router.get('/vocablist', (req, res) => {
     const { level, part } = req.query
 
-    pool.query(`SELECT * FROM level${level} WHERE part='${part}'`, (error, results) => {
+    const query = `SELECT * FROM level${level}` + ( part ? ` WHERE part='${part}'` : "" )
+
+    pool.query(query, (error, results) => {
         if (error)
             throw error
 
