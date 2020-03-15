@@ -15,99 +15,101 @@ import Typography from '@material-ui/core/Typography'
 import MenuIcon from '@material-ui/icons/Menu'
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        flexGrow: 1
-    },
-    menuButton: {
-        marginRight: theme.spacing(2)
-    },
-    list: {
-        width: 250
-    },
-    title: {
-        flexGrow: 1
-    },
-    vocabButton: {
-        borderRadius: 20
-    }
+  root: {
+    flexGrow: 1
+  },
+  menuButton: {
+    marginRight: theme.spacing(2)
+  },
+  list: {
+    width: 250
+  },
+  title: {
+    flexGrow: 1
+  },
+  vocabButton: {
+    borderRadius: 20
+  }
 }))
 
-export default () => {
-    const classes = useStyles()
+const Dashboard = () => {
+  const classes = useStyles()
 
-    const [drawerOpen, setDrawerOpen] = React.useState(false)
-    const [anchorEl, setAnchorEl] = React.useState(null)
-    const open = Boolean(anchorEl)
+  const [drawerOpen, setDrawerOpen] = React.useState(false)
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const open = Boolean(anchorEl)
 
-    const toggleDrawer = state => () => {
-        setDrawerOpen(state)
-    }
+  const toggleDrawer = state => () => {
+    setDrawerOpen(state)
+  }
 
-    const handleOpen = event => {
-        setAnchorEl(event.currentTarget)
-    }
+  const handleOpen = event => {
+    setAnchorEl(event.currentTarget)
+  }
 
-    const handleClose = () => {
-        setAnchorEl(null)
-    }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
-    return (
-        <React.Fragment className={classes.root}>
-            <CssBaseLine />
-            <AppBar position='static'>
-                <Toolbar>
-                    <IconButton className={classes.menuButton} color='inherit' onClick={toggleDrawer(true)}>
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography
-                        variant='h6'
-                        className={classes.title}
-                    >
-                        JJAP
-                    </Typography>
-                    <div>
-                        <Button
-                            onClick={handleOpen}
-                            color='inherit'
-                            className={classes.vocabButton}
-                        >
-                            <Typography
-                                variant='h5'
-                            >
-                                あ
-                            </Typography>
-                        </Button>
-                        <Menu
-                            anchorEl={anchorEl}
-                            open={open}
-                            onClose={handleClose}
-                            keepMounted
-                        >
-                            <MenuItem onClick={handleClose}>JLPT N1</MenuItem>
-                            <MenuItem onClick={handleClose}>JLPT N2</MenuItem>
-                            <MenuItem onClick={handleClose}>JLPT N3</MenuItem>
-                            <MenuItem onClick={handleClose}>JLPT N4</MenuItem>
-                            <MenuItem onClick={handleClose}>JLPT N5</MenuItem>
-                        </Menu>
-                    </div>
-                </Toolbar>
-            </AppBar>
-            <Drawer
-                open={drawerOpen}
-                onClose={toggleDrawer(false)}
+  return (
+    <React.Fragment className={classes.root}>
+      <CssBaseLine />
+      <AppBar position='static'>
+        <Toolbar>
+          <IconButton className={classes.menuButton} color='inherit' onClick={toggleDrawer(true)}>
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant='h6'
+            className={classes.title}
+          >
+            JJAP
+          </Typography>
+          <div>
+            <Button
+              onClick={handleOpen}
+              color='inherit'
+              className={classes.vocabButton}
             >
-                <div className={classes.list}>
-                    <List>
-                        {
-                            [ 'foo', 'bar', 'baz' ].map(e => (
-                                <ListItem key={e}>
-                                    <ListItemText primary={e} />
-                                </ListItem>
-                            ))
-                        }
-                    </List>
-                </div>
-            </Drawer>
-        </React.Fragment>
-    )
+              <Typography
+                variant='h5'
+              >
+                あ
+              </Typography>
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              keepMounted
+            >
+              <MenuItem onClick={handleClose}>JLPT N1</MenuItem>
+              <MenuItem onClick={handleClose}>JLPT N2</MenuItem>
+              <MenuItem onClick={handleClose}>JLPT N3</MenuItem>
+              <MenuItem onClick={handleClose}>JLPT N4</MenuItem>
+              <MenuItem onClick={handleClose}>JLPT N5</MenuItem>
+            </Menu>
+          </div>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+      >
+        <div className={classes.list}>
+          <List>
+            {
+              [ 'foo', 'bar', 'baz' ].map(e => (
+                <ListItem key={e}>
+                  <ListItemText primary={e} />
+                </ListItem>
+              ))
+            }
+          </List>
+        </div>
+      </Drawer>
+    </React.Fragment>
+  )
 }
+
+export default Dashboard
