@@ -1,11 +1,13 @@
 import React from 'react'
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
-import Dashboard from './Dashboard.js'
+import Navbar from './Navbar'
 
 const App = () => (
     <BrowserRouter>
+        <Navbar />
         <Switch>
-            <Route exact path="/" component={Dashboard}/>
+            <Route path='/' component={null} />
+            <Route path='/vocab' component={null} />
         </Switch>
     </BrowserRouter>
 )
