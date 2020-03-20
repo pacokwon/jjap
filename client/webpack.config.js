@@ -26,9 +26,6 @@ module.exports = {
     port: 8081,
     host: '0.0.0.0',
     hot: true,
-    proxy: {
-      '/api': 'http://server:8000/'
-    },
     historyApiFallback: true
   }
 }
