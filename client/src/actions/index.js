@@ -11,3 +11,8 @@ export const wordParts = [
   "adjective-verb",
   "etc"
 ]
+
+export const setLevel = level => ({
+  type: 'SET_LEVEL',
+  level
+})

@@ -1,2 +1,6 @@
 import { combineReducers } from 'redux'
-export default combineReducers({})
+import level from './level'
+
+export default combineReducers({
+  level
+})
