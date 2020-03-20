@@ -12,7 +12,7 @@ import VocabList from '../components/Vocablist'
 
 
 const useStyles = makeStyles(theme => ({
-  formgroup: {
+  gutterBottom: {
     marginBottom: 30
   }
 }))
@@ -56,14 +56,14 @@ const VocablistLayout = () => {
   }, [checkedState])
 
   return (
-    <Container fixed>
+    <Container fixed className={classes.gutterBottom}>
       <Typography
         variant='h4'
         gutterBottom
       >
         VocabList
       </Typography>
-      <FormGroup row className={classes.formgroup}>
+      <FormGroup row className={classes.gutterBottom}>
         {wordParts.map(part => (
           <FormControlLabel
             key={part}

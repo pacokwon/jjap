@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
-import { makeStyles } from '@material-ui/core/styles'
-import { setLevel } from '../actions'
+import { makeStyles, useTheme } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
 import Button from '@material-ui/core/Button'
 import CssBaseLine from '@material-ui/core/CssBaseLine'
+import IconButton from '@material-ui/core/IconButton'
 import Menu from '@material-ui/core/Menu'
 import MenuItem from '@material-ui/core/MenuItem'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
+import { Brightness4, BrightnessHigh } from '@material-ui/icons'
+import { setLevel, toggleDarkmode } from '../actions'
 
 const useStyles = makeStyles(theme => ({
   menuButton: {
@@ -33,6 +35,12 @@ const Navbar = () => {
   const classes = useStyles()
   const history = useHistory()
   const dispatch = useDispatch()
+  const theme = useTheme()
+
+  const darkmode = theme.type === 'dark'
+  const handleDarkmodeToggle = () => {
+    dispatch(toggleDarkmode())
+  }
 
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
@@ -48,7 +56,7 @@ const Navbar = () => {
   }
 
   return (
-    <React.Fragment>
+    <>
       <CssBaseLine />
       <AppBar position='static' className={classes.appbar}>
         <Toolbar>
@@ -59,6 +67,12 @@ const Navbar = () => {
             JJAP
           </Typography>
           <div>
+            <IconButton
+              color='inherit'
+              onClick={handleDarkmodeToggle}
+            >
+              {darkmode ? <BrightnessHigh /> : <Brightness4 />}
+            </IconButton>
             <Button
               onClick={handleOpen}
               color='inherit'
@@ -72,16 +86,14 @@ const Navbar = () => {
               onClose={handleClose}
               keepMounted
             >
-              {
-                [ 1, 2, 3, 4, 5 ].map(level => (
-                  <MenuItem key={level} onClick={handleClose(level)}>JLPT N{level}</MenuItem>
-                ))
-              }
+              {[ 1, 2, 3, 4, 5 ].map(level => (
+                <MenuItem key={level} onClick={handleClose(level)}>JLPT N{level}</MenuItem>
+              ))}
             </Menu>
           </div>
         </Toolbar>
       </AppBar>
-    </React.Fragment>
+    </>
   )
 }
 
