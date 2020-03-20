@@ -15,3 +15,7 @@ export const setLevel = level => ({
   type: 'SET_LEVEL',
   level
 })
+
+export const toggleDarkmode = () => ({
+  type: 'TOGGLE_DARKMODE'
+})
