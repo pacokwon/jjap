@@ -1,5 +1,4 @@
 export const wordParts = [
-  "all",
   "noun",
   "pronoun",
   "verb",
