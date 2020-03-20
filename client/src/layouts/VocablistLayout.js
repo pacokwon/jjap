@@ -22,11 +22,10 @@ let allVocab = []
 const VocablistLayout = () => {
   const classes = useStyles()
 
-  const [checkedState, setCheckedState] = useState(
-    wordParts.reduce((acc, cur) => ({ ...acc, [ cur ]: true }), {})
-  )
+  const [checkedState, setCheckedState] = useState(wordParts.reduce((acc, cur) => ({ ...acc, [ cur ]: true }), {}))
   const [vocabList, setVocabList] = useState([])
   const [loading, setLoading] = useState(false)
+  const level = useSelector(state => state.level)
 
   const toggleCheckedState = name => event => {
     if (checkedState[name]) // turn name off
@@ -36,8 +35,6 @@ const VocablistLayout = () => {
 
     setCheckedState({ ...checkedState, [name]: event.target.checked })
   }
-
-  const level = useSelector(state => state.level)
 
   useEffect(() => {
     setLoading(true)
