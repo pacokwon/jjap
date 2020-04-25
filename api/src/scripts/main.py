@@ -105,8 +105,10 @@ def retrieve_word_list(level, part):
     pages = requests.get(f"{base_path}?{encoded_params}").json()["m_totalPage"]
 
     word_list = []
+    print(f"Level {level}: ")
     for page in range(pages):
-        print(f"Page {page + 1}")
+        print(f"\tPage {page + 1}", end="")
+        print("\r", end="")
         encoded_params = urllib.parse.urlencode(
             {**params, "page": page + 1}, quote_via=urllib.parse.quote
         )
@@ -121,6 +123,7 @@ def retrieve_word_list(level, part):
             }
             for item in items
         ]
+    print("Complete")
 
     return word_list
 
