@@ -37,7 +37,7 @@ const Navbar = () => {
   const dispatch = useDispatch()
   const theme = useTheme()
 
-  const darkmode = theme.type === 'dark'
+  const darkmode = theme.palette.type === 'dark'
   const handleDarkmodeToggle = () => {
     dispatch(toggleDarkmode())
   }
